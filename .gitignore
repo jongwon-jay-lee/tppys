@@ -164,3 +164,6 @@ tmp_output
 
 # Mac files
 .DS_Store
+
+# data file
+lbox_dataset.json

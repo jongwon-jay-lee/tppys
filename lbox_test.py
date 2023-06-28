@@ -9,11 +9,19 @@ from lbox_test_tokenizer import tokenize
 
 exec(open("./lbox_test_tokenizer.py").read())
 
+"""
+def tokenize(record):
+    return record[1], len(tokenizer(record[3])["input_ids"])
+"""
+
 
 def main():
     num_workers = 4
     spark = SparkSession.builder.master(f"local[{num_workers}]").appName("lbox_cnt").getOrCreate()
     
+    # TODO: load_dataset 으로 연것은 메모리에 파일을 올린것임
+    #  즉, spark가 지향하는 바와 맞지 않음
+    #  수정 필요!!
     train_data_cn = load_dataset("lbox/lbox_open", "casename_classification")["train"]
     total_len = len(train_data_cn)
 
@@ -26,7 +34,7 @@ def main():
     
     # df = df.rdd.glom().collect()    
     # records = df.repartition(4).rdd.glom()
-    records = df.repartition(4).rdd
+    records = df.repartition(num_workers).rdd
 
     tokenizer = AutoTokenizer.from_pretrained(
         'kakaobrain/kogpt', revision='KoGPT6B-ryan1.5b-float16',  # or float32 version: revision=KoGPT6B-ryan1.5b
